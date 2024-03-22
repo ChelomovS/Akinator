@@ -79,7 +79,7 @@ akinator_error start_game(Akinator* akinator)
     if (node == nullptr)
         return akinator_bad_alloc;
 
-    Data text[MAX_SIZE_OF_DATA] = "Неизвестно кто";
+    Data text[MAX_SIZE_OF_DATA] = "Неизвестно кто\n";
     memcpy(node->data, text, sizeof(node->data));
     node->parent = first_node;
     first_node->left = node;
@@ -102,7 +102,7 @@ akinator_error game(Akinator* akinator)
     // Если указатель на правый и левый узел = nullptr, то это узел с персонажем
     while (akinator->ptr_node->right != nullptr)
     {
-        printf("%s? \n", akinator->ptr_node->data); // Выводит характристику персонажа
+        printf("%s", akinator->ptr_node->data); // Выводит характристику персонажа
 
         scanf("%s", answer);
 
@@ -110,7 +110,6 @@ akinator_error game(Akinator* akinator)
         {
             fprintf(stderr, "Ответ: Yes\n");
             fprintf(stderr, "Перехожу в правый узел\n");
-            akinator->ptr_node->parent = akinator->ptr_node;
             akinator->ptr_node = akinator->ptr_node->right; // Переходим в правый узел
         }
         else 
@@ -118,7 +117,6 @@ akinator_error game(Akinator* akinator)
         {
             fprintf(stderr, "Ответ: No\n");
             fprintf(stderr, "Перехожу в левый узел\n");
-            akinator->ptr_node->parent = akinator->ptr_node;
             akinator->ptr_node = akinator->ptr_node->left; // Переходим в левый узел
         }
         else
@@ -133,7 +131,7 @@ akinator_error game(Akinator* akinator)
 
     if (strcmp(answer, "Yes") == 0)
     {
-        fprintf(stdin, "Опять я победил :) \n");
+        printf("Опять я победил :) \n");
     }
     else 
     if (strcmp(answer, "No") == 0)
@@ -153,41 +151,36 @@ akinator_error game(Akinator* akinator)
 
         printf("Тогда чем он отличается от %s?\n", akinator->ptr_node->data);
         fgets(new_characteristic->data, MAX_SIZE_OF_DATA, stdin);
-        printf("new characteristic: %s \n", new_characteristic->data);
         printf("Окей, я запомнил...\n");
-        printf("Cейчас в птр ноде: %s", akinator->ptr_node->data);
-        printf("ptr node parent %s\n", akinator->ptr_node->parent->data);
+
         // перепривязка узлов
-        // ptr_node сейчас указывает на перса который не подошел
-        Node* old_pers = akinator->ptr_node;
-        old_pers->parent = new_characteristic;
-        new_person->parent = new_characteristic;
-        new_characteristic->left = old_pers;
-        new_characteristic->right = new_person;
         new_characteristic->parent = akinator->ptr_node->parent;
-        akinator->ptr_node->parent->right = new_characteristic;
-        akinator->ptr_node = new_person;
-        fprintf(stderr, "old pers: %s", old_pers->data);
+        if (akinator->ptr_node->parent->left == akinator->ptr_node)
+            akinator->ptr_node->parent->left = new_characteristic;
+        if (akinator->ptr_node->parent->right == akinator->ptr_node)
+            akinator->ptr_node->parent->right = new_characteristic;
+        akinator->ptr_node->parent = new_characteristic;
+        new_person->parent = new_characteristic;
+        new_characteristic->left = akinator->ptr_node;
+        new_characteristic->right = new_person;
     }
     else 
     {
         return akinator_bad_answer;
     }
 
-    if (akinator->ptr_node->parent != nullptr && akinator->ptr_node != nullptr)
+    if (akinator->ptr_node->parent != nullptr)
     {
         while (akinator->ptr_node->parent != nullptr)
         {
-            printf("Зашел в цикл\n");
             akinator->ptr_node = akinator->ptr_node->parent;
         }
     }
+    akinator->ptr_node = akinator->ptr_node->left;
 
-    akinator->root = akinator->ptr_node;
     akinator_error error = end_game(akinator);
     return error;
 }
-
 
 akinator_error end_game(Akinator* akinator)
 {
@@ -203,12 +196,12 @@ akinator_error end_game(Akinator* akinator)
     else 
     if (strcmp(answer, "No") == 0)
     {
-        akinator_dtor(akinator->root);
+        akinator_dtor(akinator->ptr_node->parent);
         return akinator_ok;
     }
     else
     {
-        akinator_dtor(akinator->root);
+        akinator_dtor(akinator->ptr_node->parent);
         return akinator_bad_answer;
     }
 
