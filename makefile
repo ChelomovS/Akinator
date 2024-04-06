@@ -4,4 +4,4 @@ SOURCES = *.cpp
 EXE = akinator
 
 all:
-	@g++ $(FLAGS) $(SOURCES) -o $(EXE)
+	@clang $(FLAGS) $(SOURCES) -o $(EXE)
